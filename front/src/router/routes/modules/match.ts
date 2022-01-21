@@ -16,11 +16,10 @@ const matches: AppRouteModule = {
   children: [
     {
       path: 'index',
-      name: 'matches',
+      name: 'matches-index',
       component: () => import('/@/views/match/index.vue'),
       meta: {
-        title: 'matches',
-        icon: 'simple-icons:about-dot-me',
+        title: 'matches-index',
         hideMenu: true,
       },
     },

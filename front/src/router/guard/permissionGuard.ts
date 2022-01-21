@@ -13,7 +13,7 @@ const LOGIN_PATH = PageEnum.BASE_LOGIN;
 
 const ROOT_PATH = RootRoute.path;
 
-const whitePathList: PageEnum[] = [LOGIN_PATH];
+const whitePathList: PageEnum[] = [LOGIN_PATH, PageEnum.MATCH_PAGE];
 
 export function createPermissionGuard(router: Router) {
   const userStore = useUserStoreWithOut();

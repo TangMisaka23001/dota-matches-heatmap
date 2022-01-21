@@ -60,7 +60,7 @@ const setting: ProjectConfig = {
     // Fixed at the top
     fixed: true,
     // Whether to show top
-    show: true,
+    show: false,
     // theme
     theme: ThemeEnum.LIGHT,
     // Whether to enable the lock screen function
@@ -120,7 +120,7 @@ const setting: ProjectConfig = {
   multiTabsSetting: {
     cache: false,
     // Turn on
-    show: true,
+    show: false,
     // Is it possible to drag and drop sorting tabs
     canDrag: true,
     // Turn on quick actions
