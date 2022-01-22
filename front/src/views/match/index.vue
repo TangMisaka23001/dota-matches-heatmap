@@ -31,11 +31,27 @@
             />
           </Space>
           <Row>
-            <CardGrid v-for="player in playerInfo" style="width: 20%">
-              <Button type="link" @click="() => addSlot(player.playerSlot)">选择</Button>
-              {{ player.playerSlot }}
-            </CardGrid>
+            <Select
+              :value="selectValue"
+              mode="tags"
+              @change="handleSelectChange"
+              style="width: 100%"
+            />
           </Row>
+          {{ 6381303328 }}
+          <div v-for="id in selectValue" :key="id">
+            <Row>{{ id }}</Row>
+            <Row>
+              <CardGrid
+                :key="player.playerSlot"
+                v-for="player in playerInfo(id)"
+                @click="() => addSlot(id, player.playerSlot)"
+                style="width: 20%; height: 20px"
+              >
+                {{ `${player.name.substring(0, 10)}-${player.heroId}` }}
+              </CardGrid>
+            </Row>
+          </div>
         </Col>
         <Col span="12">
           <Row>
@@ -95,6 +111,7 @@
     Slider,
     Space,
     Switch,
+    Select,
   } from 'ant-design-vue';
   import { PageWrapper } from '/@/components/Page';
   import { match_data } from './data';
@@ -121,7 +138,7 @@
   // 自动进行开关
   const isAuto = ref(false);
   // 行进步长
-  const autoStep = ref(10);
+  const autoStep = ref(20);
   // 滑动组件值范围
   const sliderValue = ref([unref(start), unref(start) + unref(timeRange)]);
   // 时间轴标注
@@ -136,7 +153,11 @@
     2100: '35mim',
   });
 
-  const playerSlots = ref([]);
+  // game id list
+  const selectValue = ref<number[]>([]);
+  const matchMap = ref<Map<number, any>>(new Map());
+
+  const playerSlots = ref<Map<number, number[]>>(new Map([]));
 
   const sliderChange = (value: number[]) => {
     if (unref(isFixTimeRange)) {
@@ -145,9 +166,14 @@
   };
 
   const playerArray = computed(() =>
-    match_data.players
-      .filter((f) => unref(playerSlots).includes(f.playerSlot))
-      .map((p) => p.playbackData.playerUpdatePositionEvents),
+    Array.from(unref(playerSlots).keys())
+      .map((k) => {
+        return unref(matchMap)
+          .get(parseInt(k))
+          .players.filter((f) => (unref(playerSlots).get(k) || []).includes(f.playerSlot))
+          .map((p) => p.playbackData.playerUpdatePositionEvents);
+      })
+      .flat(),
   );
   const dataSource = computed(() =>
     unref(playerArray)
@@ -178,12 +204,16 @@
     );
   });
 
-  const playerInfo = match_data.players.map((m) => ({
-    playerSlot: m.playerSlot,
-    heroId: m.heroId,
-    steamAccountId: m.steamAccountId,
-    name: m.steamAccount.proSteamAccount?.name || m.steamAccount.name,
-  }));
+  const playerInfo = (id: number) => {
+    return unref(matchMap)
+      .get(parseInt(id))
+      .players.map((m) => ({
+        playerSlot: m.playerSlot,
+        heroId: m.heroId,
+        steamAccountId: m.steamAccountId,
+        name: m.steamAccount.proSteamAccount?.name || m.steamAccount.name,
+      }));
+  };
 
   const config = computed(() => ({
     type: 'density',
@@ -210,8 +240,20 @@
     ],
   }));
 
-  const addSlot = (slot: number) => {
-    playerSlots.value = [...unref(playerSlots), slot];
+  const addSlot = (id: number, slot: number) => {
+    if (unref(playerSlots).has(id) && unref(playerSlots).get(id).includes(slot)) {
+      playerSlots.value = unref(playerSlots).set(id, [
+        ...unref(playerSlots)
+          .get(id)
+          .filter((f) => f !== slot),
+      ]);
+    } else {
+      if (unref(playerSlots).has(id)) {
+        playerSlots.value = unref(playerSlots).set(id, [...unref(playerSlots).get(id), slot]);
+      } else {
+        playerSlots.value = unref(playerSlots).set(id, [slot]);
+      }
+    }
   };
 
   watch(isAuto, () => {
@@ -223,7 +265,7 @@
           }
           sliderValue.value = [unref(sliderValue)[0], unref(sliderValue)[1] + unref(autoStep)];
         }
-      }, 100);
+      }, 1000);
     }
   });
 
@@ -253,6 +295,19 @@
   };
   const autoStepChange = (value) => {
     autoStep.value = value;
+  };
+  const handleSelectChange = (value: number[]) => {
+    value.forEach((id) => {
+      if (!unref(selectValue).includes(id)) {
+        cacheMatch(id);
+      }
+    });
+    selectValue.value = value;
+  };
+
+  const cacheMatch = (id: number) => {
+    matchMap.value = unref(matchMap).set(6381303328, match_data);
+    // 从后端获取比赛数据
   };
 </script>
 

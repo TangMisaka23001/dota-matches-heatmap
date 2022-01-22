@@ -29,7 +29,6 @@
     "test:gzip": "npx http-server dist --cors --gzip -c-1",
     "test:br": "npx http-server dist --cors --brotli -c-1",
     "reinstall": "rimraf pnpm-lock.yaml && rimraf package.lock.json && rimraf node_modules && npm run bootstrap",
-    "prepare": "husky install",
     "gen:icon": "esno ./build/generate/icon/index.ts"
   },
   "dependencies": {
@@ -111,7 +110,6 @@
     "eslint-plugin-vue": "^8.2.0",
     "esno": "^0.13.0",
     "fs-extra": "^10.0.0",
-    "husky": "^7.0.4",
     "inquirer": "^8.2.0",
     "jest": "^27.4.5",
     "less": "^4.1.2",

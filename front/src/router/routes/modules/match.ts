@@ -8,7 +8,6 @@ const matches: AppRouteModule = {
   component: LAYOUT,
   redirect: '/matches/index',
   meta: {
-    hideChildrenInMenu: true,
     icon: 'simple-icons:about-dot-me',
     title: 'matches',
     orderNo: 1,
@@ -20,7 +19,7 @@ const matches: AppRouteModule = {
       component: () => import('/@/views/match/index.vue'),
       meta: {
         title: 'matches-index',
-        hideMenu: true,
+        icon: 'simple-icons:about-dot-me',
       },
     },
   ],
