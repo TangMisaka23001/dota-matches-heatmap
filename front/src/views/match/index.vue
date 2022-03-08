@@ -31,6 +31,7 @@
             />
           </Space>
           <Row>
+            <span>比赛ID列表</span>
             <Select
               :value="selectValue"
               mode="tags"
@@ -114,10 +115,10 @@
     Select,
   } from 'ant-design-vue';
   import { PageWrapper } from '/@/components/Page';
-  import { match_data } from './data';
   import { computed, ref, unref, watch } from 'vue';
   import { HeatmapChart } from '@opd/g2plot-vue';
   import map from '/@/assets/graphical.webp';
+  import { getMatch } from '/@/api/matches/api';
 
   // 坐标缩放
   const scale = ref(700);
@@ -190,7 +191,10 @@
       })),
   );
 
-  const durationSeconds = match_data.durationSeconds;
+  const durationSeconds = computed(() =>
+    Math.max(2400, ...Array.from(unref(matchMap).values()).map((m) => m.durationSeconds)),
+  );
+  // match_data.durationSeconds;
 
   const moveData = computed(() => {
     return Object.values(
@@ -205,6 +209,7 @@
   });
 
   const playerInfo = (id: number) => {
+    console.log(Array.from(unref(matchMap).values()));
     return unref(matchMap)
       .get(parseInt(id))
       .players.map((m) => ({
@@ -306,7 +311,8 @@
   };
 
   const cacheMatch = (id: number) => {
-    matchMap.value = unref(matchMap).set(6381303328, match_data);
+    console.log(id);
+    matchMap.value = unref(matchMap).set(parseInt(id), getMatch(id));
     // 从后端获取比赛数据
   };
 </script>

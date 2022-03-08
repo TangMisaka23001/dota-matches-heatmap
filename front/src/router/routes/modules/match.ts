@@ -11,6 +11,7 @@ const matches: AppRouteModule = {
     icon: 'simple-icons:about-dot-me',
     title: 'matches',
     orderNo: 1,
+    hideChildrenInMenu: true,
   },
   children: [
     {
@@ -20,6 +21,7 @@ const matches: AppRouteModule = {
       meta: {
         title: 'matches-index',
         icon: 'simple-icons:about-dot-me',
+        hideMenu: true,
       },
     },
   ],
