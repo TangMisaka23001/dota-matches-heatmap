@@ -8,5 +8,5 @@ export enum PageEnum {
   // error log page path
   ERROR_LOG_PAGE = '/error-log/list',
 
-  MATCH_PAGE = '/matches',
+  MATCH_PAGE = '/matches/index',
 }
