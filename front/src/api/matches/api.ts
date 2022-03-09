@@ -1,8 +1,8 @@
 import { match_data } from './data';
+import {defHttp} from "/@/utils/http/axios";
 
 export const getMatch = (id: number) => {
-  return {
-    ...match_data,
-    id: parseInt(id),
-  };
+  return defHttp.get({
+    url: `/match/${id}`,
+  });
 };

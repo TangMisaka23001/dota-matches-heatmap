@@ -3,7 +3,9 @@
     <Card>
       <Row>
         <Col span="12">
-          <Space direction="vertical">
+          调试模式：<Switch :checked="debug" @change="handleChangeDebug" />
+          <br />
+          <Space direction="vertical" v-if="debug">
             <InputNumber addon-before="坐标缩放" :value="scale" step="10" @change="scaleChange" />
             <InputNumber
               addon-before="坐标偏移"
@@ -31,15 +33,19 @@
             />
           </Space>
           <Row>
-            <span>比赛ID列表</span>
+            <div>
+              <span>比赛ID列表</span><Spin v-if="request_loading" />
+              <Button type="link" @click="handleClearAll">清除全部选中信息</Button>
+            </div>
             <Select
               :value="selectValue"
               mode="tags"
               @change="handleSelectChange"
-              style="width: 100%"
+              style="width: 80%"
+              :loading="true"
             />
           </Row>
-          {{ 6381303328 }}
+          {{ 6466445129 }}
           <div v-for="id in selectValue" :key="id">
             <Row>{{ id }}</Row>
             <Row>
@@ -47,9 +53,18 @@
                 :key="player.playerSlot"
                 v-for="player in playerInfo(id)"
                 @click="() => addSlot(id, player.playerSlot)"
-                style="width: 20%; height: 20px"
+                style="width: 20%; height: 40px; padding: 5px"
               >
-                {{ `${player.name.substring(0, 10)}-${player.heroId}` }}
+                <div v-if="player">
+                  <Badge
+                    :status="
+                      playerSlots.has(id) && playerSlots.get(id).includes(player.playerSlot)
+                        ? 'success'
+                        : 'default'
+                    "
+                    :text="`${player.name?.substring(0, 10)}-${player.heroId}`"
+                  />
+                </div>
               </CardGrid>
             </Row>
           </div>
@@ -57,12 +72,8 @@
         <Col span="12">
           <Row>
             <Col span="4">
-              <Switch
-                :checked="isFixTimeRange"
-                checked-children="可选择时间范围"
-                un-checked-children="固定时间范围"
-                @change="isFixTimeRangeChange"
-              />
+              固定时间范围
+              <Switch :checked="isFixTimeRange" @change="isFixTimeRangeChange" />
             </Col>
             <Col span="6">
               <InputNumber
@@ -72,9 +83,10 @@
                 @change="timeRangeChange"
               />
             </Col>
-            <Col span="12">
+            <Col span="14">
               <Button type="primary" @click="clickStart">开始</Button>
               <Button @click="clickStop">暂停</Button>
+              <Button @click="clickReset">重置</Button>
               <InputNumber
                 addon-before="行进步长"
                 step="10"
@@ -103,6 +115,7 @@
 
 <script lang="ts" setup>
   import {
+    Spin,
     Button,
     Card,
     CardGrid,
@@ -113,6 +126,7 @@
     Space,
     Switch,
     Select,
+    Badge,
   } from 'ant-design-vue';
   import { PageWrapper } from '/@/components/Page';
   import { computed, ref, unref, watch } from 'vue';
@@ -120,6 +134,7 @@
   import map from '/@/assets/graphical.webp';
   import { getMatch } from '/@/api/matches/api';
 
+  const debug = ref(false);
   // 坐标缩放
   const scale = ref(700);
   // 坐标偏移
@@ -152,6 +167,7 @@
     1500: '25mim',
     1800: '30mim',
     2100: '35mim',
+    2400: '40mim',
   });
 
   // game id list
@@ -159,6 +175,8 @@
   const matchMap = ref<Map<number, any>>(new Map());
 
   const playerSlots = ref<Map<number, number[]>>(new Map([]));
+
+  const request_loading = ref(false);
 
   const sliderChange = (value: number[]) => {
     if (unref(isFixTimeRange)) {
@@ -171,7 +189,7 @@
       .map((k) => {
         return unref(matchMap)
           .get(parseInt(k))
-          .players.filter((f) => (unref(playerSlots).get(k) || []).includes(f.playerSlot))
+          .players?.filter((f) => (unref(playerSlots).get(k) || []).includes(f.playerSlot))
           .map((p) => p.playbackData.playerUpdatePositionEvents);
       })
       .flat(),
@@ -208,17 +226,14 @@
     );
   });
 
-  const playerInfo = (id: number) => {
-    console.log(Array.from(unref(matchMap).values()));
-    return unref(matchMap)
-      .get(parseInt(id))
-      .players.map((m) => ({
-        playerSlot: m.playerSlot,
-        heroId: m.heroId,
-        steamAccountId: m.steamAccountId,
-        name: m.steamAccount.proSteamAccount?.name || m.steamAccount.name,
-      }));
-  };
+  const playerInfo = computed(() => (id: number) => {
+    return (unref(matchMap).get(parseInt(id)) || []).players?.map((m) => ({
+      playerSlot: m.playerSlot,
+      heroId: m.heroId,
+      steamAccountId: m.steamAccountId,
+      name: m.steamAccount?.proSteamAccount?.name || m.steamAccount?.name,
+    }));
+  });
 
   const config = computed(() => ({
     type: 'density',
@@ -301,20 +316,30 @@
   const autoStepChange = (value) => {
     autoStep.value = value;
   };
-  const handleSelectChange = (value: number[]) => {
+  const handleSelectChange = (value: string[]) => {
     value.forEach((id) => {
-      if (!unref(selectValue).includes(id)) {
-        cacheMatch(id);
+      if (!unref(selectValue).includes(parseInt(id))) {
+        cacheMatch(parseInt(id));
       }
     });
-    selectValue.value = value;
+    selectValue.value = value.map((v) => parseInt(v));
   };
 
-  const cacheMatch = (id: number) => {
-    console.log(id);
-    matchMap.value = unref(matchMap).set(parseInt(id), getMatch(id));
+  const cacheMatch = async (id: number) => {
+    request_loading.value = true;
     // 从后端获取比赛数据
+    const data = await getMatch(id);
+    matchMap.value = unref(matchMap).set(parseInt(id), data);
+    request_loading.value = false;
   };
+
+  const handleClearAll = () => {
+    playerSlots.value = new Map([]);
+  };
+
+  const handleChangeDebug = () => (debug.value = !unref(debug));
+
+  const clickReset = () => (sliderValue.value = [unref(start), unref(start) + unref(timeRange)]);
 </script>
 
 <style lang="less" scoped></style>
