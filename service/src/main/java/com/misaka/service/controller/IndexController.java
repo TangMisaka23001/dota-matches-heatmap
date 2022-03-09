@@ -13,20 +13,21 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api")
 public class IndexController {
 
-    @RequestMapping(value="/**", method= RequestMethod.GET)
-    public String index(){
-        return "index";
-    }
+//    @RequestMapping(value="/**", method= RequestMethod.GET)
+//    public String index(){
+//        return "index";
+//    }
 
-    @GetMapping("getUserInfo")
-    public Result<Map<String, String>> getUserInfo() {
-        return Result.success(
-                ImmutableMap.of(
-                        "userId","123",
-                        "username", "username"
-                )
-        );
-    }
+  @GetMapping("getUserInfo")
+  public Result<Map<String, String>> getUserInfo() {
+    return Result.success(
+        ImmutableMap.of(
+            "userId", "123",
+            "username", "username"
+        )
+    );
+  }
 }

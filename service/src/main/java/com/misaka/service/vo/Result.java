@@ -8,7 +8,7 @@ import lombok.Data;
 public class Result<T> {
 
     private int code;
-    private T data;
+    private T result;
     private String message;
 
     public static <T> Result<T> success(T data) {
