@@ -4,16 +4,14 @@ import { usePermissionStoreWithOut } from '/@/store/modules/permission';
 
 import { PageEnum } from '/@/enums/pageEnum';
 import { useUserStoreWithOut } from '/@/store/modules/user';
-
 import { PAGE_NOT_FOUND_ROUTE } from '/@/router/routes/basic';
-
 import { RootRoute } from '/@/router/routes';
 
 const LOGIN_PATH = PageEnum.BASE_LOGIN;
 
 const ROOT_PATH = RootRoute.path;
 
-const whitePathList: PageEnum[] = [LOGIN_PATH];
+const whitePathList: PageEnum[] = [LOGIN_PATH, PageEnum.MATCH_PAGE];
 
 export function createPermissionGuard(router: Router) {
   const userStore = useUserStoreWithOut();

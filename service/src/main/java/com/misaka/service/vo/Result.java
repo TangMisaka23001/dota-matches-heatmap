@@ -14,4 +14,8 @@ public class Result<T> {
     public static <T> Result<T> success(T data) {
         return new Result<>(0, data, "success");
     }
+
+    public static Result<String> error(String message) {
+        return new Result<>(1, message, "error");
+    }
 }
