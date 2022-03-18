@@ -45,7 +45,6 @@
               :loading="true"
             />
           </Row>
-          {{ 6466445129 }}
           <div v-for="id in selectValue" :key="id">
             <Row>{{ id }}</Row>
             <Row>
@@ -62,7 +61,7 @@
                         ? 'success'
                         : 'default'
                     "
-                    :text="`${player.name?.substring(0, 10)}-${player.heroId}`"
+                    :text="`${player.name?.substring(0, 10)}-${HeroNameMap.get(player.heroId)}`"
                   />
                 </div>
               </CardGrid>
@@ -133,6 +132,7 @@
   import { HeatmapChart } from '@opd/g2plot-vue';
   import map from '/@/assets/graphical.webp';
   import { getMatch } from '/@/api/matches/api';
+  import { HeroNameMap } from "/@/views/match/heroNameMap";
 
   const debug = ref(false);
   // 坐标缩放

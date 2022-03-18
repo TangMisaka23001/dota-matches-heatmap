@@ -37,8 +37,8 @@ public class MatchController {
 
   private final RateLimiter secondLimiter = RateLimiter.create(20);
   private final RateLimiter minuteLimiter = RateLimiter.create(250 / 60.0);
-  private final RateLimiter hourLimiter = RateLimiter.create( 2000 / 60.0 * 60);
-  private final RateLimiter dayLimiter = RateLimiter.create(10000 / 24.0 * 60 * 60);
+  private final RateLimiter hourLimiter = RateLimiter.create(2000 / (60.0 * 60));
+  private final RateLimiter dayLimiter = RateLimiter.create(10000 / (24.0 * 60 * 60));
 
   @Value("${stratz.token}")
   private String token;
@@ -50,10 +50,12 @@ public class MatchController {
           if (secondLimiter.tryAcquire() && minuteLimiter.tryAcquire() && hourLimiter.tryAcquire()
               && dayLimiter.tryAcquire()) {
             Request request = new Builder()
-                .header("authorization",this.token)
+                .header("authorization", this.token)
                 .url("https://api.stratz.com/api/v1/match/" + id).build();
             try (Response response = client.newCall(request).execute()) {
-              return objectMapper.readValue(Objects.requireNonNull(response.body()).string(), MatchVO.class);
+              MatchVO value = objectMapper.readValue(Objects.requireNonNull(response.body()).string(), MatchVO.class);
+              System.out.println(value);
+              return value;
             }
           }
           throw new Exception("请求超过API限制");

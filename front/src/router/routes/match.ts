@@ -2,11 +2,11 @@ import type { AppRouteModule } from '/@/router/types';
 
 export const matchesRoutes: AppRouteModule[] = [
   {
-    path: '/matches/index',
-    name: 'matches',
+    path: '/matches-heatmap',
+    name: 'matches-heatmap',
     component: () => import('/@/views/match/index.vue'),
     meta: {
-      title: 'matches',
+      title: 'matches-heatmap',
       ignoreAuth: true,
     },
   },
