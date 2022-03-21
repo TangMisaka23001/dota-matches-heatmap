@@ -1,6 +1,18 @@
+spring:
+  web:
+    resources:
+      static-locations: file:./dist
 
 server:
   port: 8080
+  compression:
+    enabled: true
+    mime-types: application/javascript,text/css,application/json,application/xml,text/html,text/xml,text/plain
+  shutdown: graceful
+  servlet:
+    encoding:
+      charset: UTF-8
+    context-path: /useless-dota/
 
 stratz:
-  token: ''
+  token: Bearer ''
