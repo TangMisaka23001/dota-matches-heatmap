@@ -5,4 +5,6 @@
 试用地址 https://www.bilibifun.cn/useless-dota/matches-heatmap
 
 ## 部署
+> `需求JDK 11+`
+
 前往 https://stratz.com/api 申请token并填入后端项目application.yml 的 `stratz.token` 字段中
