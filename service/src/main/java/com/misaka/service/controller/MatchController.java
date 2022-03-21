@@ -6,6 +6,9 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.util.concurrent.RateLimiter;
 import com.misaka.service.vo.MatchVO;
 import com.misaka.service.vo.Result;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.Proxy.Type;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -26,12 +29,14 @@ import org.springframework.web.bind.annotation.RestController;
 @SuppressWarnings("UnstableApiUsage")
 public class MatchController {
 
-  private final OkHttpClient client = new OkHttpClient.Builder().build();
+  private final OkHttpClient client = new OkHttpClient.Builder()
+      .proxy(new Proxy(Type.SOCKS, new InetSocketAddress(20170)))
+      .build();
   private final ObjectMapper objectMapper;
 
   private final Cache<Long, MatchVO> matchCache = CacheBuilder.newBuilder()
-      .initialCapacity(10)
-      .maximumSize(100)
+      .initialCapacity(100)
+      .maximumSize(70000)
       .expireAfterWrite(7, TimeUnit.DAYS)
       .build();
 
@@ -53,9 +58,7 @@ public class MatchController {
                 .header("authorization", this.token)
                 .url("https://api.stratz.com/api/v1/match/" + id).build();
             try (Response response = client.newCall(request).execute()) {
-              MatchVO value = objectMapper.readValue(Objects.requireNonNull(response.body()).string(), MatchVO.class);
-              System.out.println(value);
-              return value;
+              return objectMapper.readValue(Objects.requireNonNull(response.body()).string(), MatchVO.class);
             }
           }
           throw new Exception("请求超过API限制");
